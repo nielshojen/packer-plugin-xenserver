@@ -266,33 +266,22 @@ func (self *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (p
 		},
 		&xscommon.StepForwardPortOverSSH{
 			RemotePort:  xscommon.InstanceSSHPort,
-			RemoteDest:  xscommon.InstanceSSHIP,
+			RemoteDest:  xscommon.InstanceIP,
 			HostPortMin: self.config.HostPortMin,
 			HostPortMax: self.config.HostPortMax,
 			ResultKey:   "local_ssh_port",
 		},
+		// &communicator.StepConnect{
+		// 	Config:    &self.config.SSHConfig.Comm,
+		// 	Host:      xscommon.InstanceIP,
+		// 	SSHConfig: self.config.Comm.SSHConfigFunc(),
+		// 	SSHPort:   xscommon.InstanceSSHPort,
+		// },
 		&communicator.StepConnect{
-			Config:    &self.config.SSHConfig.Comm,
-			Host:      xscommon.InstanceSSHIP,
-			SSHConfig: self.config.Comm.SSHConfigFunc(),
-			SSHPort:   xscommon.InstanceSSHPort,
+			Config:        &self.config.Comm,
+			Host:          xscommon.InstanceIP,
+			CustomConnect: map[string]multistep.Step{},
 		},
-		new(commonsteps.StepProvision),
-		new(xscommon.StepShutdown),
-		new(xscommon.StepSetVmToTemplate),
-		&xscommon.StepDetachVdi{
-			VdiUuidKey: "iso_vdi_uuid",
-		},
-		&xscommon.StepDetachVdi{
-			VdiUuidKey: "isoname_vdi_uuid",
-		},
-		&xscommon.StepDetachVdi{
-			VdiUuidKey: "tools_vdi_uuid",
-		},
-		&xscommon.StepDetachVdi{
-			VdiUuidKey: "floppy_vdi_uuid",
-		},
-		new(xscommon.StepExport),
 	}
 
 	if self.config.ISOName == "" {

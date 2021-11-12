@@ -63,6 +63,7 @@ func (self *StepWaitForIP) Run(ctx context.Context, state multistep.StateBag) mu
 					if ip, ok := networks["0/ip"]; ok {
 						if ip != "" {
 							ui.Message(fmt.Sprintf("Got IP '%s' from XenServer tools", ip))
+							state.Put("instance_ip_address", ip)
 							return true, nil
 						}
 					}
@@ -79,14 +80,14 @@ func (self *StepWaitForIP) Run(ctx context.Context, state multistep.StateBag) mu
 		return multistep.ActionHalt
 	}
 
-	ui.Say(fmt.Sprintf("Got IP address '%s'", ip))
-	state.Put("instance_ssh_address", ip)
+	ip = state.Get("instance_ip_address").(string)
+	ui.Say(fmt.Sprintf("Got instance IP address '%s'", ip))
 
 	return multistep.ActionContinue
 }
 
-func InstanceSSHIP(state multistep.StateBag) (string, error) {
-	ip := state.Get("instance_ssh_address").(string)
+func InstanceIP(state multistep.StateBag) (string, error) {
+	ip := state.Get("instance_address").(string)
 	return ip, nil
 }
 
